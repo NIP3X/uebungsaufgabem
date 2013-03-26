@@ -35,7 +35,7 @@ class Auto
         Console.WriteLine("Verbrauch : " + Verbrauch + " l/100km"); 
         Console.WriteLine("Tachostand : " + Tachostand + " m"); 
     }
-    
+
     public void Fahre(uint Meter, bool MacheAusgabe = false)
     {
         float VerbrauchMeter = Verbrauch / 100000f;
@@ -44,7 +44,7 @@ class Auto
         int MeterInkrement = 10000;
         for(int i = (int)Meter / MeterInkrement; i > 0; i--)
         {        
-            
+
             float Teilverbrauch = VerbrauchMeter * MeterInkrement;
             Tachostand += MeterInkrement;
             Tankinhalt -= Teilverbrauch;
@@ -64,7 +64,7 @@ class Auto
                 i = 0;
             }
         }
-    
+
         uint MeterRest = Meter % 10000;
         Tankinhalt -= VerbrauchMeter * MeterRest;
         Tachostand += MeterRest;
@@ -87,9 +87,68 @@ class Auto
 
 class Register
 {
-    static void Main()
+    public List<Auto> Autos;
+
+    public Register()
     {
-        List<Auto> Autos = new List<Auto>();
+        Autos = new List<Auto>();
+    }
+
+    void Info()
+    {
+        foreach(Auto auto in Autos)
+            auto.Ausgabe();
+    }
+
+    void Eingabe()
+    {
+        bool running = true;
+        while(running)
+        {
+            Console.WriteLine("r = Registrieren, i = Info , f = Fahren, t = Test");
+            string abfrage = Console.ReadLine();
+            switch(abfrage)
+            {
+                case"r":
+                    Registration();
+                    break;
+                case"i":
+                    Info();
+                    break;
+                case"f":
+                    Console.Write("Wie Viel Meter sollen die Autos Fahren : ");
+                    uint Meter = Convert.ToUInt32(Console.ReadLine());
+                    foreach(Auto auto in Autos)
+                    auto.Fahre(Meter);  
+                    break;
+                case"q":
+                    running = false;
+                    break;
+                case"t":
+                    Teste();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }
+
+    void Registration()
+    {
+        Console.Write("Typ : ");
+        string Typ = Console.ReadLine();
+        Console.Write("\nTankkapazität in Liter : ");
+        uint Tank = Convert.ToUInt32(Console.ReadLine());
+        Console.Write("\nVerbrauch in Liter pro 100KM : ");
+        uint Verbrauch = Convert.ToUInt32(Console.ReadLine());
+        Console.Write("\nTachostand in Metern: ");
+        uint Kilometerstand = Convert.ToUInt32(Console.ReadLine());
+        Autos.Add(new Auto(Typ, Tank, Verbrauch, Kilometerstand));
+    }
+
+    void Teste()
+    {
         Autos.Add(new Auto("BMW", 40, 23, 10, 0));
         Autos.Add(new Auto("Audi", 60, 15, 10000));
         Autos.Add(new Auto("VW", 20, 5, 0));
@@ -99,5 +158,11 @@ class Register
             auto.Ausgabe();
             auto.Fahre(100000, true);
         }
+    }
+
+    static void Main()
+    {
+        Register register = new Register();
+        register.Eingabe();
     }
 }
