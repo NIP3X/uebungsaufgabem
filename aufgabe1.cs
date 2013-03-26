@@ -30,31 +30,49 @@ class Auto
     public void Ausgabe()
     {
         Console.WriteLine("Typ : " + Beschreibung);
-        Console.WriteLine("Tankkapazität : " + Tankkapazitaet); 
-        Console.WriteLine("Tankinhalt : " + Tankinhalt); 
-        Console.WriteLine("Verbrauch : " + Verbrauch); 
-        Console.WriteLine("Tachostand : " + Tachostand + "m"); 
+        Console.WriteLine("Tankkapazität : " + Tankkapazitaet + " l"); 
+        Console.WriteLine("Tankinhalt : " + Tankinhalt + " l"); 
+        Console.WriteLine("Verbrauch : " + Verbrauch + " l/100km"); 
+        Console.WriteLine("Tachostand : " + Tachostand + " m"); 
     }
     
     public void Fahre(uint Meter, bool MacheAusgabe = false)
     {
         float VerbrauchMeter = Verbrauch / 100000f;
-        float Gesamtverbrauch = VerbrauchMeter * Meter;
-        float VerbleibendeLiter = Tankinhalt - Gesamtverbrauch;
-        Tachostand += Meter;
-        Tankinhalt = VerbleibendeLiter;
+        uint GefahrendeMeter = 0;
 
+        int MeterInkrement = 10000;
+        for(int i = (int)Meter / MeterInkrement; i > 0; i--)
+        {        
+            
+            float Teilverbrauch = VerbrauchMeter * MeterInkrement;
+            Tachostand += MeterInkrement;
+            Tankinhalt -= Teilverbrauch;
+            GefahrendeMeter = GefahrendeMeter + (uint)MeterInkrement;
 
+            if(MacheAusgabe)
+                Console.WriteLine(Beschreibung + " : Hat nach " + GefahrendeMeter + " Metern noch " + Tankinhalt + " l im Tank.");
 
+            // Falls das Auto liegen bleibt
+            if(Tankinhalt <= 0)
+            {
+                float MeterUeber = Math.Abs(Tankinhalt) / VerbrauchMeter;
+                Tachostand -= MeterUeber;
+                Tankinhalt = 0;
 
-
-
-
+                // Breche Schleife ab
+                i = 0;
+            }
+        }
+    
+        uint MeterRest = Meter % 10000;
+        Tankinhalt -= VerbrauchMeter * MeterRest;
+        Tachostand += MeterRest;
 
         // Falls das Auto liegen bleibt
-        if(VerbleibendeLiter <= 0)
+        if(Tankinhalt <= 0)
         {
-            float MeterUeber = Math.Abs(VerbleibendeLiter) / VerbrauchMeter;
+            float MeterUeber = Math.Abs(Tankinhalt) / VerbrauchMeter;
             Tachostand -= MeterUeber;
             Tankinhalt = 0;
         }
@@ -62,7 +80,7 @@ class Auto
         // Warne falls weniger als 20 Liter im Tank
         if(Tankinhalt <= 20)
         {
-            Console.WriteLine("WARUNG nur noch " + Tankinhalt + " Liter im Tank bitte Tanken !!!!");
+            Console.WriteLine("WARNUNG nur noch " + Tankinhalt + " Liter im Tank bitte Tanken !!!!");
         }
     }
 }
@@ -72,14 +90,14 @@ class Register
     static void Main()
     {
         List<Auto> Autos = new List<Auto>();
-        Autos.Add(new Auto("BMW", 40, 23, 4, 1000));
+        Autos.Add(new Auto("BMW", 40, 23, 10, 0));
+        Autos.Add(new Auto("Audi", 60, 15, 10000));
+        Autos.Add(new Auto("VW", 20, 5, 0));
+        Autos.Add(new Auto("Opel", 35, 20, 7, 230000));
         foreach(Auto auto in Autos)
         {
             auto.Ausgabe();
-            auto.Fahre(3000);
-            auto.Ausgabe();
-            auto.Fahre(700000);
-            auto.Ausgabe();
+            auto.Fahre(100000, true);
         }
     }
 }
